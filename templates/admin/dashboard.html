@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard - Cloud LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="mb-1 text-primary-dark">System Administration</h2>
+        <p class="text-muted">Global analytics, metrics overview, and directory manager tools for Cloud LMS.</p>
+    </div>
+</div>
+
+<!-- Administration Stats Grid -->
+<div class="row mb-4">
+    <!-- Total Students Card -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card card-custom card-stat stat-student p-3 d-flex flex-row align-items-center justify-content-between">
+            <div>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Registered Students</h6>
+                <h3 class="mb-0 text-primary">{{ stats.students_count }}</h3>
+            </div>
+            <i class="fa-solid fa-user-graduate stat-icon text-primary"></i>
+        </div>
+    </div>
+    <!-- Total Faculty Card -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card card-custom card-stat stat-faculty p-3 d-flex flex-row align-items-center justify-content-between">
+            <div>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Faculty Staff</h6>
+                <h3 class="mb-0 text-info">{{ stats.faculty_count }}</h3>
+            </div>
+            <i class="fa-solid fa-chalkboard-user stat-icon text-info"></i>
+        </div>
+    </div>
+    <!-- Total Courses Card -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card card-custom card-stat stat-course p-3 d-flex flex-row align-items-center justify-content-between">
+            <div>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Active Courses</h6>
+                <h3 class="mb-0 text-success">{{ stats.courses_count }}</h3>
+            </div>
+            <i class="fa-solid fa-book stat-icon text-success"></i>
+        </div>
+    </div>
+    <!-- Total Submissions Card -->
+    <div class="col-md-3 col-sm-6">
+        <div class="card card-custom card-stat stat-assignment p-3 d-flex flex-row align-items-center justify-content-between">
+            <div>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Submissions Received</h6>
+                <h3 class="mb-0 text-warning">{{ stats.submissions_count }}</h3>
+            </div>
+            <i class="fa-solid fa-file-signature stat-icon text-warning"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Collaboration Analytics Grid -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h4 class="mb-3 text-primary-dark"><i class="fa-solid fa-users me-2"></i>Collaboration Analytics</h4>
+    </div>
+    <!-- Total Matches Card -->
+    <div class="col-md-4">
+        <div class="card card-custom p-3 border-start border-4 border-primary bg-light d-flex flex-row align-items-center justify-content-between">
+            <div>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Total Matches</h6>
+                <h3 class="mb-0 text-primary">{{ buddy_stats.total_matches }}</h3>
+            </div>
+            <i class="fa-solid fa-handshake fa-2x text-primary opacity-50"></i>
+        </div>
+    </div>
+    <!-- Active Collaborations Card (Assuming all matches are active for now) -->
+    <div class="col-md-4">
+        <div class="card card-custom p-3 border-start border-4 border-success bg-light d-flex flex-row align-items-center justify-content-between">
+            <div>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Active Collaborations</h6>
+                <h3 class="mb-0 text-success">{{ buddy_stats.total_matches }}</h3>
+            </div>
+            <i class="fa-solid fa-people-group fa-2x text-success opacity-50"></i>
+        </div>
+    </div>
+    <!-- Students Needing Support Card -->
+    <div class="col-md-4">
+        <div class="card card-custom p-3 border-start border-4 border-danger bg-light d-flex flex-row align-items-center justify-content-between">
+            <div>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Students Needing Support</h6>
+                <h3 class="mb-0 text-danger">{{ buddy_stats.students_needing_support }}</h3>
+            </div>
+            <i class="fa-solid fa-life-ring fa-2x text-danger opacity-50"></i>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Quick Actions Panel -->
+    <div class="col-lg-4 mb-4">
+        <div class="card card-custom p-4 h-100">
+            <h4 class="mb-3 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-gears me-2"></i>Quick Actions</h4>
+            <div class="d-flex flex-column gap-3 mt-3">
+                <a href="{{ url_for('admin_courses') }}" class="btn btn-outline-primary btn-custom text-start p-3">
+                    <i class="fa-solid fa-plus-circle me-2"></i><strong>Create New Course</strong>
+                    <span class="d-block text-muted style" style="font-size: 0.8rem; font-weight: normal;">Define curriculum and assign faculty</span>
+                </a>
+                <a href="{{ url_for('admin_faculty') }}" class="btn btn-outline-info btn-custom text-start p-3">
+                    <i class="fa-solid fa-user-plus me-2"></i><strong>Add Faculty Account</strong>
+                    <span class="d-block text-muted" style="font-size: 0.8rem; font-weight: normal;">Register new instructors and departments</span>
+                </a>
+                <a href="{{ url_for('admin_students') }}" class="btn btn-outline-secondary btn-custom text-start p-3">
+                    <i class="fa-solid fa-users-viewfinder me-2"></i><strong>Manage Students Directory</strong>
+                    <span class="d-block text-muted" style="font-size: 0.8rem; font-weight: normal;">View, edit details or remove students</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Courses Summary Table -->
+    <div class="col-lg-8 mb-4">
+        <div class="card card-custom p-4 h-100">
+            <h4 class="mb-3 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-graduation-cap me-2"></i>Recent Course Deployments</h4>
+            {% if courses %}
+                <div class="table-responsive table-responsive-custom">
+                    <table class="table table-hover table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Course Name</th>
+                                <th>Instructor</th>
+                                <th>Department</th>
+                                <th class="text-end">Manage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in courses[:5] %}
+                                <tr>
+                                    <td><span class="badge bg-primary-subtle text-primary">{{ course.code }}</span></td>
+                                    <td class="fw-semibold">{{ course.name }}</td>
+                                    <td>{{ course.faculty_name or 'Unassigned' }}</td>
+                                    <td>{{ course.faculty_department or 'N/A' }}</td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('admin_courses') }}" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill">
+                                            Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-book-open mb-3" style="font-size: 2.5rem;"></i>
+                    <p class="mb-0">No courses defined in the database.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
