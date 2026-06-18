@@ -28,3 +28,6 @@ static/uploads/
 
 # Gemini/Agent files
 .agents/
+
+# Build scripts
+push_commits.ps1
