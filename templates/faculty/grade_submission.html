@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Grade Submission - Faculty Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Back Link -->
+        <a href="{{ url_for('faculty_course_detail', course_id=submission.course_id) }}" class="btn btn-sm btn-outline-secondary mb-3 btn-custom">
+            <i class="fa-solid fa-arrow-left me-1"></i>Back to Course
+        </a>
+
+        <!-- Submission details card -->
+        <div class="card card-custom p-4 mb-4">
+            <h4 class="mb-3 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-circle-info me-2"></i>Submission Details</h4>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <span class="text-muted d-block" style="font-size: 0.85rem;">Student Name</span>
+                    <span class="fw-semibold text-dark fs-5">{{ submission.student_name }}</span>
+                </div>
+                <div class="col-md-6">
+                    <span class="text-muted d-block" style="font-size: 0.85rem;">Roll Number</span>
+                    <span class="fw-semibold text-dark fs-5">{{ submission.student_roll_no }}</span>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <span class="text-muted d-block" style="font-size: 0.85rem;">Assignment Task</span>
+                    <span class="fw-semibold text-dark">{{ submission.assignment_title }}</span>
+                </div>
+                <div class="col-md-6">
+                    <span class="text-muted d-block" style="font-size: 0.85rem;">Submitted On</span>
+                    <span class="fw-semibold text-dark"><i class="fa-regular fa-clock me-1"></i>{{ submission.submitted_at.strftime('%d-%b-%Y at %I:%M %p') }}</span>
+                </div>
+            </div>
+
+            <div class="p-3 bg-light rounded d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted d-block mb-1" style="font-size: 0.85rem;">Submitted File</span>
+                    <i class="fa-regular fa-file-lines text-primary me-2"></i>
+                    <span class="fw-bold">{{ submission.file_path.split('_', 1)[-1] if '_' in submission.file_path else submission.file_path }}</span>
+                </div>
+                <div>
+                    <a href="{{ url_for('static', filename='uploads/submissions/' + submission.file_path) }}" class="btn btn-sm btn-primary-custom btn-custom" download>
+                        <i class="fa-solid fa-download me-1"></i>Download & Review
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grading Form Card -->
+        <div class="card card-custom p-4">
+            <h4 class="mb-4 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-square-poll-vertical me-2"></i>Evaluation Scorecard</h4>
+            
+            <form action="{{ url_for('faculty_grade_submission', submission_id=submission.id) }}" method="POST">
+                <div class="mb-3">
+                    <label for="score" class="form-label fw-semibold text-muted">Award Score (Out of 100)</label>
+                    <input type="number" name="score" id="score" class="form-control form-control-custom w-50" min="0" max="100" placeholder="e.g. 85" value="{{ submission.score if submission.score is not none else '' }}" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="feedback" class="form-label fw-semibold text-muted">Feedback Comments</label>
+                    <textarea name="feedback" id="feedback" rows="5" class="form-control form-control-custom" placeholder="Provide constructive criticism, highlight areas of improvement, or note outstanding performance..." required>{{ submission.feedback if submission.feedback else '' }}</textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-success btn-custom py-2 px-4 border-0" style="background-color: var(--success-color);">
+                    <i class="fa-solid fa-check-double me-1"></i>{% if submission.status == 'Graded' %}Update Grade{% else %}Submit Grade{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
