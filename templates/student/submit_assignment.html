@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Submit Assignment - Cloud LMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Back Link -->
+        <a href="{{ url_for('student_course_detail', course_id=assignment.course_id) }}" class="btn btn-sm btn-outline-secondary mb-3 btn-custom">
+            <i class="fa-solid fa-arrow-left me-1"></i>Back to Course
+        </a>
+
+        <!-- Assignment Description Card -->
+        <div class="card card-custom p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-3 border-bottom pb-2">
+                <div>
+                    <span class="badge bg-primary mb-2">{{ assignment.course_code }}</span>
+                    <h3 class="mb-1 text-primary-dark">{{ assignment.title }}</h3>
+                </div>
+                <div class="text-end">
+                    <span class="text-muted d-block" style="font-size: 0.85rem;">Due Date</span>
+                    <span class="fw-semibold text-danger"><i class="fa-regular fa-calendar-days me-1"></i>{{ assignment.due_date.strftime('%d-%b-%Y %I:%M %p') }}</span>
+                </div>
+            </div>
+            
+            <h6 class="fw-bold">Assignment Instructions:</h6>
+            <p class="text-muted" style="white-space: pre-wrap; font-size: 0.95rem;">{{ assignment.description or 'No instruction text provided.' }}</p>
+        </div>
+
+        <!-- Submission Status & Upload Card -->
+        <div class="card card-custom p-4">
+            <h4 class="mb-4 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-upload me-2"></i>My Submission</h4>
+            
+            {% if submission %}
+                <div class="alert {% if submission.status == 'Graded' %}alert-success{% else %}alert-info{% endif %} border-0 p-3 mb-4 rounded d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="alert-heading mb-1 fw-bold">
+                            {% if submission.status == 'Graded' %}
+                                <i class="fa-solid fa-square-check me-1"></i>Your Assignment is Graded
+                            {% else %}
+                                <i class="fa-solid fa-circle-check me-1"></i>Submitted Successfully
+                            {% endif %}
+                        </h6>
+                        <p class="mb-0" style="font-size: 0.9rem;">
+                            Uploaded file: <a href="{{ url_for('static', filename='uploads/submissions/' + submission.file_path) }}" class="fw-bold text-decoration-underline" download>{{ submission.file_path.split('_', 1)[-1] if '_' in submission.file_path else submission.file_path }}</a>
+                        </p>
+                        <small class="text-muted" style="font-size: 0.8rem;">Submitted on: {{ submission.submitted_at.strftime('%d-%b-%Y at %I:%M %p') }}</small>
+                    </div>
+                    <div>
+                        <span class="badge {% if submission.status == 'Graded' %}bg-success{% else %}bg-primary{% endif %} py-2 px-3 fs-6 rounded-pill">{{ submission.status }}</span>
+                    </div>
+                </div>
+
+                {% if submission.status == 'Graded' %}
+                    <!-- Display Grades -->
+                    <div class="card p-3 border-success-subtle bg-success-subtle bg-opacity-10 mb-4" style="border-radius: 8px;">
+                        <h6 class="text-success fw-bold mb-2"><i class="fa-solid fa-award me-1"></i>Evaluation Results</h6>
+                        <div class="row align-items-center">
+                            <div class="col-md-3 border-end">
+                                <span class="text-muted" style="font-size: 0.85rem;">Score</span>
+                                <h2 class="text-success mb-0 fw-bold">{{ submission.score }}<span class="text-muted fs-6 font-normal"> / 100</span></h2>
+                            </div>
+                            <div class="col-md-9 ps-md-4">
+                                <span class="text-muted d-block" style="font-size: 0.85rem;">Feedback Comments</span>
+                                <p class="mb-0 text-dark" style="font-style: italic;">"{{ submission.feedback or 'Good job!' }}"</p>
+                                <small class="text-muted d-block mt-2">Graded by: {{ submission.graded_by_name }}</small>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-warning border-0 p-3 mb-4 rounded">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i> <strong>No submission yet.</strong> Please upload your work before the due date.
+                </div>
+            {% endif %}
+
+            <!-- Upload Form -->
+            {% if not submission or submission.status == 'Submitted' %}
+                <form action="{{ url_for('student_submit_assignment', assignment_id=assignment.id) }}" method="POST" enctype="multipart/form-data" class="mt-2">
+                    <div class="mb-4">
+                        <label for="file" class="form-label fw-semibold">Select Submission File</label>
+                        <input type="file" name="file" id="file" class="form-control form-control-custom" required>
+                        <div class="form-text mt-2 text-muted">
+                            <i class="fa-solid fa-circle-info me-1"></i> Allowed extensions: <strong>pdf, docx, doc, png, jpg, jpeg, zip</strong>. Max size: <strong>10MB</strong>.
+                        </div>
+                    </div>
+
+                    {% if submission %}
+                        <button type="submit" class="btn btn-warning btn-custom py-2 px-4 text-dark border-0">
+                            <i class="fa-solid fa-arrows-rotate me-1"></i>Resubmit Work
+                        </button>
+                        <p class="text-muted mt-2" style="font-size: 0.85rem;">* Note: Resubmitting will overwrite your previously uploaded file.</p>
+                    {% else %}
+                        <button type="submit" class="btn btn-primary-custom btn-custom py-2 px-4">
+                            <i class="fa-solid fa-paper-plane me-1"></i>Submit Assignment
+                        </button>
+                    {% endif %}
+                </form>
+            {% else %}
+                <div class="text-center p-3 border rounded text-muted bg-light">
+                    <i class="fa-solid fa-lock mb-2 d-block fs-3"></i>
+                    <span>This submission is locked because it has been graded. Changes are no longer allowed.</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
