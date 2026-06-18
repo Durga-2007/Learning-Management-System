@@ -205,3 +205,11 @@ Be prepared to answer these common questions during your viva:
 > 1. **Allowed Extensions**: We restrict upload types to safe document or zip formats using the `allowed_file` check, preventing users from uploading executable `.exe` or script files.
 > 2. **File Size Limit**: We limit sizes to 10MB using `MAX_CONTENT_LENGTH`.
 > 3. **Unique Naming**: We pass filenames through `secure_filename` to sanitize special characters and prepend unique timestamps and IDs to prevent files from overwriting each other.
+
+
+---
+
+## License
+
+This project is developed for educational purposes as part of a Cloud Computing course project.
+
