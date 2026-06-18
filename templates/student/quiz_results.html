@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Quiz Results - Level {{ level.level_number }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <!-- Results Header Card -->
+        <div class="card card-custom border-0 shadow-sm p-4 text-center mb-4 {% if passed %}bg-success-light{% else %}bg-danger-light{% endif %}">
+            <!-- Score Display (always shown) -->
+            <div class="mb-3">
+                <span class="display-4 fw-bold {% if passed %}text-success{% else %}text-danger{% endif %}">
+                    {{ correct_count }}/{{ total_count }}
+                </span>
+                <p class="text-muted mb-0 mt-1">Your Quiz Score ({{ score }}%)</p>
+            </div>
+
+            {% if passed %}
+                <div class="mb-3 text-success">
+                    <i class="fa-solid fa-circle-check fa-4x animate-pulse"></i>
+                </div>
+                <h2 class="text-success fw-bold">Level Passed!</h2>
+                <p class="text-success-dark fw-medium fs-5">Outstanding work! You scored {{ correct_count }} out of {{ total_count }} and unlocked the next level.</p>
+                <p class="text-success fw-semibold mt-2">{{ streak_message }}</p>
+                <div class="d-flex justify-content-center flex-wrap gap-3 mt-3">
+                    <span class="badge bg-warning text-dark px-4 py-2 fs-6 rounded-pill animate-pulse">
+                        <i class="fa-solid fa-star me-1 text-primary"></i>+{{ xp_earned }} XP Earned
+                    </span>
+                    <span class="badge bg-danger px-4 py-2 fs-6 rounded-pill animate-pulse">
+                        <i class="fa-solid fa-fire me-1"></i>Streak: {{ current_streak }} Day{{ 's' if current_streak != 1 else '' }}</span>
+                </div>
+            {% else %}
+                <div class="mb-3 text-danger">
+                    <i class="fa-solid fa-triangle-exclamation fa-4x animate-pulse"></i>
+                </div>
+                <h2 class="text-danger fw-bold">Try Again!</h2>
+                <p class="text-danger-dark fw-medium fs-5">
+                    You scored {{ correct_count }} out of {{ total_count }}. You need more than 3 correct answers to maintain your streak.
+                </p>
+                <p class="text-danger fw-semibold mt-2">{{ streak_message }}</p>
+                <div class="d-flex justify-content-center flex-wrap gap-3 mt-3">
+                    <span class="badge bg-warning text-dark px-4 py-2 fs-6 rounded-pill">
+                        <i class="fa-solid fa-star me-1 text-primary"></i>+{{ xp_earned }} XP Earned
+                    </span>
+                    <span class="badge bg-secondary px-4 py-2 fs-6 rounded-pill">
+                        <i class="fa-solid fa-fire me-1"></i>Streak unchanged</span>
+                </div>
+            {% endif %}
+            
+            <div class="mt-4 d-flex justify-content-center gap-3">
+                {% if passed %}
+                    <a href="{{ url_for('student_course_detail', course_id=level.course_id) }}#game" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold shadow-sm">
+                        Return to Course Page
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('student_play_level', level_id=level.id) }}" class="btn btn-danger rounded-pill px-5 py-2 fw-semibold shadow-sm animate-pulse">
+                        <i class="fa-solid fa-rotate-right me-2"></i>Retry Quiz
+                    </a>
+                    <a href="{{ url_for('student_course_detail', course_id=level.course_id) }}#game" class="btn btn-outline-secondary rounded-pill px-5 py-2 fw-semibold">
+                        Return to Course
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Detailed Review Card -->
+        <div class="card card-custom border-0 shadow-sm p-4 mb-4">
+            <h4 class="mb-4 text-primary-dark"><i class="fa-solid fa-clipboard-list me-2"></i>Detailed Question Review</h4>
+            
+            <div class="d-flex flex-column gap-4">
+                {% for res in results %}
+                    <div class="p-3 rounded border {% if res.is_correct %}border-success-subtle bg-success-light-10{% else %}border-danger-subtle bg-danger-light-10{% endif %}">
+                        <div class="d-flex align-items-start justify-content-between mb-2">
+                            <span class="fw-bold text-dark">Question {{ loop.index }}</span>
+                            {% if res.is_correct %}
+                                <span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>Correct</span>
+                            {% else %}
+                                <span class="badge bg-danger"><i class="fa-solid fa-xmark me-1"></i>Incorrect</span>
+                            {% endif %}
+                        </div>
+                        
+                        <p class="text-dark fw-semibold mb-3">{{ res.question }}</p>
+                        
+                        <!-- Options Details -->
+                        <div class="row row-cols-1 row-cols-sm-2 g-2 mb-3">
+                            <div class="col small">
+                                <span class="fw-bold">A:</span> {{ res.option_a }}
+                            </div>
+                            <div class="col small">
+                                <span class="fw-bold">B:</span> {{ res.option_b }}
+                            </div>
+                            <div class="col small">
+                                <span class="fw-bold">C:</span> {{ res.option_c }}
+                            </div>
+                            <div class="col small">
+                                <span class="fw-bold">D:</span> {{ res.option_d }}
+                            </div>
+                        </div>
+
+                        <div class="small mt-2 pt-2 border-top">
+                            <div class="mb-1">
+                                <span class="fw-bold">Your Answer:</span> 
+                                <span class="badge {% if res.is_correct %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ res.submitted or 'None' }}
+                                </span>
+                            </div>
+                            <div class="mb-2">
+                                <span class="fw-bold">Correct Answer:</span> 
+                                <span class="badge bg-success">{{ res.correct }}</span>
+                            </div>
+                            {% if res.explanation %}
+                                <div class="bg-white p-2 rounded border mt-2 text-muted">
+                                    <span class="fw-bold text-dark"><i class="fa-solid fa-lightbulb me-1 text-warning"></i>Explanation:</span> 
+                                    {{ res.explanation }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-success-light {
+    background-color: #e8f5e9 !important;
+}
+.bg-success-light-10 {
+    background-color: rgba(76, 175, 80, 0.05) !important;
+}
+.bg-danger-light {
+    background-color: #ffebee !important;
+}
+.bg-danger-light-10 {
+    background-color: rgba(244, 67, 54, 0.05) !important;
+}
+.text-success-dark {
+    color: #1b5e20 !important;
+}
+.text-danger-dark {
+    color: #b71c1c !important;
+}
+</style>
+{% endblock %}
