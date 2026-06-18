@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Study Buddy Matcher - Cloud LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="mb-1 text-primary-dark"><i class="fa-solid fa-user-group me-2 text-primary"></i>Study Buddy Matcher</h2>
+        <p class="text-muted">Find peers to collaborate with based on your course performance and goals.</p>
+    </div>
+</div>
+
+<!-- Active Study Buddies -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card card-custom p-4">
+            <h4 class="mb-4"><i class="fa-solid fa-handshake text-success me-2"></i>My Active Buddies</h4>
+            {% if active_buddies %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Buddy Name</th>
+                                <th>Email Contact</th>
+                                <th>Course</th>
+                                <th>Paired On</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for buddy in active_buddies %}
+                            <tr>
+                                <td class="fw-semibold">{{ buddy.buddy_name }}</td>
+                                <td><a href="mailto:{{ buddy.buddy_email }}">{{ buddy.buddy_email }}</a></td>
+                                <td><span class="badge bg-primary-subtle text-primary border">{{ buddy.course_name }}</span></td>
+                                <td>{{ buddy.created_at.strftime('%d %b %Y') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4 text-muted border rounded bg-light">
+                    <i class="fa-solid fa-users fa-3x mb-3 text-secondary"></i>
+                    <p class="mb-0">You don't have any study buddies yet. Check out the recommendations below!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Recommendations per course -->
+<div class="row">
+    <div class="col-12">
+        <h4 class="mb-4"><i class="fa-solid fa-wand-magic-sparkles text-warning me-2"></i>Recommended Matches</h4>
+    </div>
+    
+    {% if not enrolled_courses %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fa-solid fa-circle-info me-2"></i> Enroll in some courses first to get study buddy recommendations!
+            </div>
+        </div>
+    {% else %}
+        {% for course in enrolled_courses %}
+            <div class="col-12 mb-4">
+                <h5 class="text-primary border-bottom pb-2 mb-3">{{ course.name }} ({{ course.code }})</h5>
+                
+                {% set recs = course_recommendations.get(course.id) %}
+                
+                {% if not recs %}
+                    <p class="text-muted small">No available buddies to match in this course right now.</p>
+                {% else %}
+                    <div class="row g-3">
+                        {% for peer in recs %}
+                        <div class="col-md-4">
+                            <div class="card h-100 border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3">
+                                        <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: bold;">
+                                            {{ peer.name[0] | upper }}
+                                        </div>
+                                    </div>
+                                    <h5 class="card-title fw-bold mb-1">{{ peer.name }}</h5>
+                                    <p class="text-muted small mb-3">{{ peer.roll_no }}</p>
+                                    
+                                    <div class="d-flex justify-content-center gap-3 mb-3">
+                                        <div class="text-center">
+                                            <span class="d-block fw-bold {% if peer.average_score >= 80 %}text-success{% elif peer.average_score >= 60 %}text-warning{% else %}text-danger{% endif %}">{{ "%.0f"|format(peer.average_score) }}%</span>
+                                            <span class="text-muted" style="font-size: 0.75rem;">Avg Score</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <form action="{{ url_for('student_add_buddy', course_id=course.id, buddy_id=peer.student_id) }}" method="POST">
+                                        <button type="submit" class="btn btn-sm btn-primary w-100 rounded-pill">
+                                            <i class="fa-solid fa-user-plus me-1"></i> Collaborate
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+{% endblock %}

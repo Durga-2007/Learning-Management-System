@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+{% block title %}{{ course.name }} - Student Portal{% endblock %}
+
+{% block content %}
+<!-- Course Header -->
+<div class="card card-custom p-4 mb-4" style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%); color: #ffffff;">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <span class="badge bg-info mb-2 text-dark font-weight-bold">{{ course.code }}</span>
+            <h1 class="mb-1 text-white">{{ course.name }}</h1>
+            <p class="mb-0 text-white-50"><i class="fa-solid fa-chalkboard-user me-2"></i>Instructor: <strong>{{ course.faculty_name or 'Unassigned' }}</strong> ({{ course.faculty_email or 'N/A' }})</p>
+        </div>
+        <div>
+            <a href="{{ url_for('student_ai_assistant', course_id=course.id) }}" class="btn btn-light btn-custom text-primary me-2">
+                <i class="fa-solid fa-robot me-1"></i>Ask Course AI
+            </a>
+            <form action="{{ url_for('student_unenroll', course_id=course.id) }}" method="POST" class="d-inline mb-0" onsubmit="return confirm('Are you sure you want to drop this course?');">
+                <button type="submit" class="btn btn-outline-danger btn-custom border-light text-white">
+                    <i class="fa-solid fa-right-from-bracket me-1"></i>Drop Course
+                </button>
+            </form>
+        </div>
+    </div>
+    {% if course.description %}
+        <div class="mt-3 pt-3 border-top border-white-10">
+            <h6 class="text-white-50 mb-1">Course Description:</h6>
+            <p class="mb-0 text-white-80" style="font-size: 0.95rem;">{{ course.description }}</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Tabs Navigation -->
+<div class="row">
+    <div class="col-lg-12">
+        <ul class="nav nav-pills mb-4" id="courseTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active btn-custom px-4 me-2" id="materials-tab" data-bs-toggle="pill" data-bs-target="#materials" type="button" role="tab" aria-controls="materials" aria-selected="true">
+                    <i class="fa-solid fa-file-pdf me-2"></i>Study Materials
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link btn-custom px-4 me-2" id="assignments-tab" data-bs-toggle="pill" data-bs-target="#assignments" type="button" role="tab" aria-controls="assignments" aria-selected="false">
+                    <i class="fa-solid fa-file-signature me-2"></i>Assignments
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link btn-custom px-4 me-2" id="grades-tab" data-bs-toggle="pill" data-bs-target="#grades" type="button" role="tab" aria-controls="grades" aria-selected="false">
+                    <i class="fa-solid fa-square-poll-vertical me-2"></i>Grades & Feedback
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link btn-custom px-4 text-warning" id="game-tab" data-bs-toggle="pill" data-bs-target="#game" type="button" role="tab" aria-controls="game" aria-selected="false">
+                    <i class="fa-solid fa-gamepad me-2 text-warning animate-pulse"></i>Learning Game
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="courseTabContent">
+            <!-- 1. Study Materials Tab -->
+            <div class="tab-pane fade show active" id="materials" role="tabpanel" aria-labelledby="materials-tab">
+                <div class="card card-custom p-4">
+                    <h4 class="mb-3 text-primary-dark"><i class="fa-solid fa-cloud-arrow-down me-2"></i>Course Downloads</h4>
+                    {% if materials %}
+                        <div class="table-responsive table-responsive-custom">
+                            <table class="table table-hover table-custom align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Material Title</th>
+                                        <th>Description</th>
+                                        <th>Uploaded On</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for mat in materials %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    {% if mat.file_path.endswith('.pdf') %}
+                                                        <i class="fa-solid fa-file-pdf text-danger fs-4"></i>
+                                                    {% elif mat.file_path.endswith('.docx') or mat.file_path.endswith('.doc') %}
+                                                        <i class="fa-solid fa-file-word text-primary fs-4"></i>
+                                                    {% else %}
+                                                        <i class="fa-solid fa-file-lines text-secondary fs-4"></i>
+                                                    {% endif %}
+                                                    <span class="fw-semibold">{{ mat.title }}</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-muted" style="max-width: 300px;">{{ mat.description or 'No description provided.' }}</td>
+                                            <td>{{ mat.uploaded_at.strftime('%d-%b-%Y') if mat.uploaded_at else 'N/A' }}</td>
+                                            <td class="text-end">
+                                                <a href="{{ url_for('static', filename='uploads/materials/' + mat.file_path) }}" class="btn btn-sm btn-outline-primary py-1 px-3 rounded-pill" download>
+                                                    <i class="fa-solid fa-download me-1"></i>Download
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-file-circle-xmark mb-3" style="font-size: 3rem;"></i>
+                            <p class="mb-0">No study materials have been uploaded for this course yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- 2. Assignments Tab -->
+            <div class="tab-pane fade" id="assignments" role="tabpanel" aria-labelledby="assignments-tab">
+                <div class="card card-custom p-4">
+                    <h4 class="mb-3 text-primary-dark"><i class="fa-solid fa-pencil me-2"></i>Assignments Checklist</h4>
+                    {% if assignments_with_status %}
+                        <div class="table-responsive table-responsive-custom">
+                            <table class="table table-hover table-custom align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Assignment Details</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in assignments_with_status %}
+                                        <tr>
+                                            <td>
+                                                <div class="fw-semibold">{{ item.assignment.title }}</div>
+                                                <small class="text-muted" style="display: block; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                    {{ item.assignment.description or 'No details provided.' }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <i class="fa-regular fa-calendar-days me-1 text-warning"></i>
+                                                {{ item.assignment.due_date.strftime('%d-%b-%Y %I:%M %p') }}
+                                            </td>
+                                            <td>
+                                                {% if item.submission %}
+                                                    {% if item.submission.status == 'Graded' %}
+                                                        <span class="badge bg-success-subtle text-success py-1 px-3 border border-success-subtle rounded-pill">Graded</span>
+                                                    {% else %}
+                                                        <span class="badge bg-info-subtle text-info py-1 px-3 border border-info-subtle rounded-pill">Submitted</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-danger-subtle text-danger py-1 px-3 border border-danger-subtle rounded-pill">Pending</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end">
+                                                {% if item.submission %}
+                                                    {% if item.submission.status == 'Graded' %}
+                                                        <a href="#grades" onclick="document.getElementById('grades-tab').click();" class="btn btn-sm btn-outline-success py-1 px-3 rounded-pill">
+                                                            View Grade
+                                                        </a>
+                                                    {% else %}
+                                                        <a href="{{ url_for('student_submit_assignment', assignment_id=item.assignment.id) }}" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill">
+                                                            Update Submission
+                                                        </a>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <a href="{{ url_for('student_submit_assignment', assignment_id=item.assignment.id) }}" class="btn btn-sm btn-primary-custom py-1 px-3 rounded-pill btn-custom">
+                                                        Submit Work
+                                                    </a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-list-check mb-3" style="font-size: 3rem;"></i>
+                            <p class="mb-0">No assignments have been assigned for this course yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- 3. Grades & Feedback Tab -->
+            <div class="tab-pane fade" id="grades" role="tabpanel" aria-labelledby="grades-tab">
+                <div class="card card-custom p-4">
+                    <h4 class="mb-3 text-primary-dark"><i class="fa-solid fa-award me-2"></i>Performance Grades</h4>
+                    {% if grades %}
+                        <div class="table-responsive table-responsive-custom">
+                            <table class="table table-hover table-custom align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Assignment</th>
+                                        <th>Score</th>
+                                        <th>Feedback Comment</th>
+                                        <th>Graded By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for grade in grades %}
+                                        <tr>
+                                            <td class="fw-semibold">{{ grade.title }}</td>
+                                            <td>
+                                                {% if grade.score is not none %}
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <span class="fs-5 fw-bold text-success">{{ grade.score }}</span>
+                                                        <span class="text-muted" style="font-size: 0.8rem;">/ 100</span>
+                                                    </div>
+                                                {% else %}
+                                                    <span class="text-muted">Not Graded</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-muted" style="max-width: 350px; font-style: italic;">
+                                                "{{ grade.feedback or 'No feedback comments provided yet.' }}"
+                                            </td>
+                                            <td>
+                                                <small class="text-muted"><i class="fa-solid fa-user me-1"></i>{{ grade.graded_by_name or 'Instructor' }}</small>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-trophy mb-3" style="font-size: 3rem;"></i>
+                            <p class="mb-0">You do not have any graded assignments in this course yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- 4. Learning Game Tab -->
+            <div class="tab-pane fade" id="game" role="tabpanel" aria-labelledby="game-tab">
+                <div class="card card-custom p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <h4 class="mb-0 text-primary-dark"><i class="fa-solid fa-map-signs me-2 text-warning animate-pulse"></i>Course Learning Adventure</h4>
+                        <span class="badge bg-warning text-dark"><i class="fa-solid fa-star me-1 text-primary"></i>Daily Challenge Mode</span>
+                    </div>
+                    <p class="text-muted">Master this course's levels in order, earn XP, and unlock next challenges!</p>
+
+                    <!-- Duolingo-style Adventure Path Container -->
+                    <div class="adventure-path-container mt-4">
+                        <div class="adventure-path">
+                            {% for lvl in course_levels %}
+                                <div class="adventure-level-item">
+                                    {% if lvl.is_passed %}
+                                        <a href="{{ url_for('student_play_level', level_id=lvl.id) }}" class="adventure-node passed" title="Level {{ lvl.level_number }}: {{ lvl.title }} (Passed)">
+                                            <i class="fa-solid fa-check"></i>
+                                        </a>
+                                    {% elif lvl.is_unlocked %}
+                                        <a href="{{ url_for('student_play_level', level_id=lvl.id) }}" class="adventure-node unlocked" title="Level {{ lvl.level_number }}: {{ lvl.title }} (Play)">
+                                            {{ lvl.level_number }}
+                                        </a>
+                                    {% else %}
+                                        <div class="adventure-node locked" title="Level {{ lvl.level_number }}: {{ lvl.title }} (Locked)">
+                                            <i class="fa-solid fa-lock"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="adventure-label">
+                                        <span class="adventure-label-title">Lvl {{ lvl.level_number }}: {{ lvl.title }}</span>
+                                        <span class="adventure-label-subtitle">{{ lvl.description }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Check if URL has hash like #game and show that tab
+    const hash = window.location.hash;
+    if (hash) {
+        const tabEl = document.querySelector(`button[data-bs-target="${hash}"]`);
+        if (tabEl) {
+            // Deactivate other tabs
+            document.querySelectorAll('#courseTab .nav-link').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+            });
+            document.querySelectorAll('#courseTabContent .tab-pane').forEach(pane => {
+                pane.classList.remove('show', 'active');
+            });
+
+            // Activate target tab
+            tabEl.classList.add('active');
+            tabEl.setAttribute('aria-selected', 'true');
+            const targetPane = document.querySelector(hash);
+            if (targetPane) {
+                targetPane.classList.add('show', 'active');
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

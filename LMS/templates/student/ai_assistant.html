@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}AI Study Assistant - Cloud LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="mb-1 text-primary-dark"><i class="fa-solid fa-robot me-2 text-primary"></i>AI Study Companion</h2>
+        <p class="text-muted">Interactive tutor to help you generate quiz questions, course outlines, and explain complex concepts.</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- AI Chat Interface -->
+        <div class="card card-custom p-4">
+            <!-- Course Context Selection -->
+            <div class="row mb-3 align-items-center">
+                <div class="col-md-7">
+                    <label for="ai-course-id" class="form-label fw-semibold text-muted mb-1" style="font-size: 0.85rem;">Select Course Context</label>
+                    <select id="ai-course-id" class="form-select form-control-custom">
+                        <option value="">General Studies (No specific course context)</option>
+                        {% for course in enrolled_courses %}
+                            <option value="{{ course.id }}" {% if selected_course_id and selected_course_id == course.id %}selected{% endif %}>
+                                {{ course.code }} - {{ course.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                    <span class="badge bg-secondary-subtle text-secondary py-1 px-3 border"><i class="fa-solid fa-shield-halved me-1"></i>Offline Fallback Enabled</span>
+                </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="chat-container">
+                <div class="chat-history" id="chat-history">
+                    <!-- Default Bot Greeting -->
+                    <div class="chat-message bot">
+                        <h5 class="text-primary mt-1"><i class="fa-solid fa-face-smile me-2"></i>Hello there, {{ session.get('name') }}!</h5>
+                        <p>I am your **AI Study Assistant**. I can help you summarize your course contents, generate mock practice quizzes, or explain technical topics.</p>
+                        <p class="mb-0">Choose a course context above and try typing a question, or click one of the suggested prompts below to start learning!</p>
+                    </div>
+                </div>
+                
+                <!-- Quick Prompt Suggestions -->
+                <div class="px-3 py-2 border-top bg-light d-flex flex-wrap gap-2 align-items-center" style="font-size: 0.85rem;">
+                    <span class="text-muted fw-semibold"><i class="fa-solid fa-wand-magic-sparkles"></i> Try:</span>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 suggestion-chip">Give me study tips</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 suggestion-chip">Generate a practice quiz</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 suggestion-chip">Explain MVC architecture</button>
+                </div>
+
+                <!-- Chat Input Form -->
+                <div class="chat-input-area">
+                    <form id="ai-chat-form" class="d-flex gap-2">
+                        <input type="text" id="ai-chat-input" class="form-control form-control-custom" placeholder="Ask a study question... (e.g. 'What is cloud computing?')" required autocomplete="off">
+                        <button type="submit" class="btn btn-primary-custom btn-custom px-4">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const suggestionChips = document.querySelectorAll(".suggestion-chip");
+        const aiChatInput = document.getElementById("ai-chat-input");
+        const aiChatForm = document.getElementById("ai-chat-form");
+
+        suggestionChips.forEach(chip => {
+            chip.addEventListener("click", function() {
+                aiChatInput.value = this.innerText;
+                // Dispatch submit event
+                aiChatForm.dispatchEvent(new Event('submit', { cancelable: true }));
+            });
+        });
+    });
+</script>
+{% endblock %}

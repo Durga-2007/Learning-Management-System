@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard - Cloud LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="mb-1 text-primary-dark"><i class="fa-solid fa-trophy me-2 text-warning animate-pulse"></i>Global Leaderboard</h2>
+        <p class="text-muted">Compete with your peers, earn XP, maintain streaks, and rise to the top!</p>
+    </div>
+</div>
+
+<!-- Top 3 Podium -->
+{% if leaderboard|length >= 3 %}
+    <div class="row align-items-end justify-content-center mb-5 mt-4">
+        <!-- 2nd Place -->
+        <div class="col-md-3 text-center order-2 order-md-1">
+            <div class="podium-card second p-4 rounded shadow border-0 bg-white mb-2 position-relative" style="border-top: 6px solid #c0c0c0 !important;">
+                <div class="podium-badge bg-secondary text-white rounded-circle position-absolute" style="top: -20px; left: calc(50% - 20px); width: 40px; height: 40px; line-height: 40px; font-weight: bold; font-size: 1.2rem;">
+                    2
+                </div>
+                <div class="user-avatar-wrapper mb-3">
+                    <i class="fa-solid fa-user-circle fa-3x text-secondary"></i>
+                </div>
+                <h5 class="fw-bold mb-1">{{ leaderboard[1].name }}</h5>
+                <span class="badge bg-warning text-dark rounded-pill px-3 py-1 mb-2">
+                    <i class="fa-solid fa-star me-1 text-primary"></i>{{ leaderboard[1].total_xp }} XP
+                </span>
+                <div class="text-danger small fw-semibold">
+                    <i class="fa-solid fa-fire me-1"></i>{{ leaderboard[1].current_streak }} Day Streak
+                </div>
+            </div>
+            <div class="bg-secondary rounded-top text-white py-2 fw-bold" style="height: 40px;">2nd Place</div>
+        </div>
+
+        <!-- 1st Place -->
+        <div class="col-md-4 text-center order-1 order-md-2 mb-4 mb-md-0">
+            <div class="podium-card first p-4 rounded shadow border-0 bg-white mb-2 position-relative" style="border-top: 8px solid #ffd700 !important; transform: scale(1.05);">
+                <div class="podium-badge bg-warning text-dark rounded-circle position-absolute" style="top: -25px; left: calc(50% - 25px); width: 50px; height: 50px; line-height: 50px; font-weight: bold; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                    👑
+                </div>
+                <div class="user-avatar-wrapper mb-3">
+                    <i class="fa-solid fa-user-circle fa-4x text-warning"></i>
+                </div>
+                <h4 class="fw-bold mb-1">{{ leaderboard[0].name }}</h4>
+                <span class="badge bg-warning text-dark rounded-pill px-4 py-2 mb-2 fs-6">
+                    <i class="fa-solid fa-star me-1 text-primary"></i>{{ leaderboard[0].total_xp }} XP
+                </span>
+                <div class="text-danger fw-bold fs-5">
+                    <i class="fa-solid fa-fire me-1"></i>{{ leaderboard[0].current_streak }} Day Streak
+                </div>
+            </div>
+            <div class="bg-warning text-dark rounded-top py-3 fw-bold fs-5" style="height: 60px; box-shadow: 0 -4px 10px rgba(0,0,0,0.05);">1st Place</div>
+        </div>
+
+        <!-- 3rd Place -->
+        <div class="col-md-3 text-center order-3">
+            <div class="podium-card third p-4 rounded shadow border-0 bg-white mb-2 position-relative" style="border-top: 6px solid #cd7f32 !important;">
+                <div class="podium-badge text-white rounded-circle position-absolute" style="top: -20px; left: calc(50% - 20px); width: 40px; height: 40px; line-height: 40px; font-weight: bold; font-size: 1.2rem; background-color: #cd7f32;">
+                    3
+                </div>
+                <div class="user-avatar-wrapper mb-3">
+                    <i class="fa-solid fa-user-circle fa-3x text-bronze"></i>
+                </div>
+                <h5 class="fw-bold mb-1">{{ leaderboard[2].name }}</h5>
+                <span class="badge bg-warning text-dark rounded-pill px-3 py-1 mb-2">
+                    <i class="fa-solid fa-star me-1 text-primary"></i>{{ leaderboard[2].total_xp }} XP
+                </span>
+                <div class="text-danger small fw-semibold">
+                    <i class="fa-solid fa-fire me-1"></i>{{ leaderboard[2].current_streak }} Day Streak
+                </div>
+            </div>
+            <div class="rounded-top text-white py-2 fw-bold" style="height: 30px; background-color: #cd7f32;">3rd Place</div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Full Leaderboard Table -->
+<div class="row justify-content-center mt-5">
+    <div class="col-md-10">
+        <div class="card card-custom border-0 shadow-sm p-4">
+            <h4 class="mb-4 text-primary-dark"><i class="fa-solid fa-list-ol me-2"></i>Global Ranking</h4>
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 100px;">Rank</th>
+                            <th>Student</th>
+                            <th>Total XP</th>
+                            <th>Current Streak</th>
+                            <th>Longest Streak</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if leaderboard %}
+                            {% for student in leaderboard %}
+                                <tr {% if session.get('name') == student.name %}class="table-primary fw-semibold"{% endif %}>
+                                    <td>
+                                        {% if loop.index == 1 %}
+                                            <span class="fs-4">🥇</span>
+                                        {% elif loop.index == 2 %}
+                                            <span class="fs-4">🥈</span>
+                                        {% elif loop.index == 3 %}
+                                            <span class="fs-4">🥉</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary rounded-pill px-2.5 py-1.5">{{ loop.index }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-user-circle text-muted fs-5"></i>
+                                            <span>{{ student.name }}</span>
+                                            {% if session.get('name') == student.name %}
+                                                <span class="badge bg-primary rounded-pill small ms-2">You</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-1.5">
+                                            <i class="fa-solid fa-star me-1 text-primary"></i>{{ student.total_xp }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-danger fw-semibold">
+                                            <i class="fa-solid fa-fire me-1"></i>{{ student.current_streak }} days
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">{{ student.longest_streak }} days</span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    No students have registered points yet. Be the first to earn XP!
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.text-bronze {
+    color: #cd7f32 !important;
+}
+.podium-card {
+    transition: all 0.3s ease;
+}
+.podium-card:hover {
+    transform: translateY(-5px);
+}
+.second, .third {
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.first {
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+</style>
+{% endblock %}

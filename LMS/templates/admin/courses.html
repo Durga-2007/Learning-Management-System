@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Manage Courses - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="mb-1 text-primary-dark">Course Catalog Manager</h2>
+        <p class="text-muted">Register new academic courses, assign faculty instructors, or update syllabus parameters.</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column: Course Registry (8 columns) -->
+    <div class="col-lg-8 mb-4">
+        <div class="card card-custom p-4">
+            <h4 class="mb-3 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-graduation-cap me-2"></i>Active Courses</h4>
+            
+            {% if courses %}
+                <div class="table-responsive table-responsive-custom">
+                    <table class="table table-hover table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Course Name</th>
+                                <th>Assigned Instructor</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in courses %}
+                                <tr>
+                                    <td><span class="badge bg-primary-subtle text-primary fw-semibold">{{ course.code }}</span></td>
+                                    <td>
+                                        <div class="fw-semibold">{{ course.name }}</div>
+                                        <small class="text-muted d-block text-truncate" style="max-width: 280px;">{{ course.description or 'No syllabus description defined.' }}</small>
+                                    </td>
+                                    <td>
+                                        {% if course.faculty_name %}
+                                            <span class="text-dark"><i class="fa-solid fa-chalkboard-user me-1 text-muted"></i>{{ course.faculty_name }}</span>
+                                        {% else %}
+                                            <span class="text-danger fw-semibold"><i class="fa-solid fa-triangle-exclamation me-1"></i>Unassigned</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('admin_courses', edit_id=course.id) }}" class="btn btn-sm btn-outline-primary py-1 px-2 rounded-circle me-1" title="Edit course">
+                                            <i class="fa-solid fa-pencil"></i>
+                                        </a>
+                                        <form action="{{ url_for('admin_delete_course', course_id=course.id) }}" method="POST" class="d-inline mb-0" onsubmit="return confirm('Delete this course? This will remove all materials, assignments, student enrollments, and grading submissions for this course.');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2 rounded-circle" title="Delete course">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-book-open mb-3" style="font-size: 3rem;"></i>
+                    <p class="mb-0">No courses defined in the database catalog yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Column: Add/Edit Course Form (4 columns) -->
+    <div class="col-lg-4 mb-4">
+        {% if edit_course %}
+            <!-- Edit Course Card -->
+            <div class="card card-custom p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                    <h4 class="mb-0 text-primary-dark"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Course</h4>
+                    <a href="{{ url_for('admin_courses') }}" class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill">Cancel</a>
+                </div>
+                
+                <form action="{{ url_for('admin_edit_course', course_id=edit_course.id) }}" method="POST">
+                    <div class="mb-3">
+                        <label for="edit_code" class="form-label fw-semibold text-muted">Course Code</label>
+                        <input type="text" name="code" id="edit_code" class="form-control form-control-custom" value="{{ edit_course.code }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_name" class="form-label fw-semibold text-muted">Course Name</label>
+                        <input type="text" name="name" id="edit_name" class="form-control form-control-custom" value="{{ edit_course.name }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_description" class="form-label fw-semibold text-muted">Course Description</label>
+                        <textarea name="description" id="edit_description" rows="3" class="form-control form-control-custom">{{ edit_course.description }}</textarea>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="edit_faculty_id" class="form-label fw-semibold text-muted">Assign Faculty / Instructor</label>
+                        <select name="faculty_id" id="edit_faculty_id" class="form-select form-control-custom">
+                            <option value="">-- Leave Unassigned --</option>
+                            {% for fac in faculty_list %}
+                                <option value="{{ fac.id }}" {% if edit_course.faculty_id == fac.id %}selected{% endif %}>
+                                    {{ fac.name }} ({{ fac.department }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-warning btn-custom w-100 border-0" style="background-color: var(--warning-color); color: white;">
+                        <i class="fa-solid fa-circle-check me-1"></i>Update Course Parameters
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <!-- Add Course Card -->
+            <div class="card card-custom p-4">
+                <h4 class="mb-3 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-circle-plus me-2"></i>Create Course</h4>
+                
+                <form action="{{ url_for('admin_courses') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="code" class="form-label fw-semibold text-muted">Course Code</label>
+                        <input type="text" name="code" id="code" class="form-control form-control-custom" placeholder="e.g. CS-401" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-semibold text-muted">Course Name</label>
+                        <input type="text" name="name" id="name" class="form-control form-control-custom" placeholder="e.g. Cloud Computing" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-semibold text-muted">Course Description</label>
+                        <textarea name="description" id="description" rows="3" class="form-control form-control-custom" placeholder="Syllabus objectives, topics, prerequisites..."></textarea>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="faculty_id" class="form-label fw-semibold text-muted">Assign Faculty / Instructor</label>
+                        <select name="faculty_id" id="faculty_id" class="form-select form-control-custom">
+                            <option value="" selected>-- Leave Unassigned --</option>
+                            {% for fac in faculty_list %}
+                                <option value="{{ fac.id }}">{{ fac.name }} ({{ fac.department }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary-custom btn-custom w-100">
+                        <i class="fa-solid fa-circle-plus me-1"></i>Publish Course
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

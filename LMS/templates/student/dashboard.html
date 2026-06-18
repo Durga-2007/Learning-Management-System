@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard - Cloud LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="mb-1 text-primary-dark">Welcome back, {{ student.name }}!</h2>
+        <p class="text-muted">Here's a summary of your academic progress and course activities.</p>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <!-- Enrolled Courses Card -->
+    <div class="col-md-4 col-sm-6">
+        <div class="card card-custom card-stat stat-student p-3 d-flex flex-row align-items-center justify-content-between">
+            <div>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Enrolled Courses</h6>
+                <h3 class="mb-0 text-primary">{{ enrolled_courses | length }}</h3>
+            </div>
+            <i class="fa-solid fa-book-open stat-icon text-primary"></i>
+        </div>
+    </div>
+    <!-- Pending Assignments Card -->
+    <div class="col-md-4 col-sm-6">
+        <div class="card card-custom card-stat stat-assignment p-3 d-flex flex-row align-items-center justify-content-between">
+            <div>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Pending Tasks</h6>
+                <h3 class="mb-0 text-warning">{{ pending_count }}</h3>
+            </div>
+            <i class="fa-solid fa-clock-rotate-left stat-icon text-warning"></i>
+        </div>
+    </div>
+    <!-- Notifications Card -->
+    <div class="col-md-4 col-sm-12">
+        <div class="card card-custom card-stat stat-course p-3 d-flex flex-row align-items-center justify-content-between">
+            <div>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size: 0.8rem; letter-spacing: 0.5px;">Unread Notifications</h6>
+                <h3 class="mb-0 text-success">{{ unread_notifications_count }}</h3>
+            </div>
+            <i class="fa-solid fa-bell stat-icon text-success"></i>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column: Courses -->
+    <div class="col-lg-8 mb-4">
+        <!-- My Enrolled Courses -->
+        <div class="card card-custom p-4 mb-4">
+            <h4 class="mb-3 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-graduation-cap me-2"></i>My Enrolled Courses</h4>
+            {% if enrolled_courses %}
+                <div class="row">
+                    {% for course in enrolled_courses %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border p-3" style="border-radius: 10px; transition: hover 0.2s;">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-primary-subtle text-primary" style="font-weight: 600;">{{ course.code }}</span>
+                                </div>
+                                <h5 class="card-title text-dark mb-1">{{ course.name }}</h5>
+                                <p class="text-muted mb-3" style="font-size: 0.85rem; height: 38px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                    {{ course.description or 'No course description available.' }}
+                                </p>
+                                <div class="mt-auto d-flex justify-content-between align-items-center">
+                                    <small class="text-muted"><i class="fa-solid fa-chalkboard-user me-1"></i>{{ course.faculty_name or 'Not Assigned' }}</small>
+                                    <a href="{{ url_for('student_course_detail', course_id=course.id) }}" class="btn btn-sm btn-primary-custom btn-custom py-1 px-3">
+                                        Open Portal
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-folder-open mb-3" style="font-size: 3rem;"></i>
+                    <p class="mb-0">You are not enrolled in any courses yet.</p>
+                    <small>Search and enroll in a course below to get started!</small>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Available Courses (Enrollment Panel) -->
+        <div class="card card-custom p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                <h4 class="mb-0 text-primary-dark"><i class="fa-solid fa-magnifying-glass me-2"></i>Browse & Enroll</h4>
+                
+                <!-- Search bar -->
+                <form action="{{ url_for('student_dashboard') }}" method="GET" class="d-flex gap-2" style="max-width: 300px;">
+                    <input type="text" name="search" class="form-control form-control-custom py-1 px-3" placeholder="Search course code/name" value="{{ search_query }}">
+                    <button type="submit" class="btn btn-sm btn-primary-custom py-1 px-3"><i class="fa-solid fa-search"></i></button>
+                    {% if search_query %}
+                        <a href="{{ url_for('student_dashboard') }}" class="btn btn-sm btn-outline-secondary py-1 px-2"><i class="fa-solid fa-times"></i></a>
+                    {% endif %}
+                </form>
+            </div>
+
+            {% if available_courses %}
+                <div class="row">
+                    {% for course in available_courses %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border p-3" style="border-radius: 10px; background-color: #fcfdfe;">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-secondary-subtle text-secondary" style="font-weight: 600;">{{ course.code }}</span>
+                                </div>
+                                <h5 class="card-title text-dark mb-1">{{ course.name }}</h5>
+                                <p class="text-muted mb-3" style="font-size: 0.85rem; height: 38px; overflow: hidden;">
+                                    {{ course.description or 'No course description available.' }}
+                                </p>
+                                <div class="mt-auto d-flex justify-content-between align-items-center">
+                                    <small class="text-muted"><i class="fa-solid fa-chalkboard-user me-1"></i>{{ course.faculty_name or 'Unassigned' }}</small>
+                                    <form action="{{ url_for('student_enroll', course_id=course.id) }}" method="POST" class="mb-0">
+                                        <button type="submit" class="btn btn-sm btn-success py-1 px-3 btn-custom border-0" style="background-color: var(--success-color);">
+                                            Enroll Now
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4 text-muted">
+                    <p class="mb-0">No new courses available for enrollment.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Column: Notifications & Logs -->
+    <div class="col-lg-4">
+        <div class="card card-custom p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                <h4 class="mb-0 text-primary-dark"><i class="fa-solid fa-bell me-2"></i>Notifications</h4>
+                {% if notifications %}
+                    <form action="{{ url_for('student_read_notifications') }}" method="POST" class="mb-0">
+                        <button type="submit" class="btn btn-sm btn-link text-decoration-none p-0" style="font-size: 0.85rem;">Mark all read</button>
+                    </form>
+                {% endif %}
+            </div>
+            
+            <div style="max-height: 520px; overflow-y: auto; padding-right: 5px;">
+                {% if notifications %}
+                    {% for notification in notifications %}
+                        <div class="p-3 mb-2 notification-item {% if not notification.is_read %}unread{% endif %} rounded card-custom shadow-none border">
+                            <p class="mb-1" style="font-size: 0.9rem; font-weight: {% if not notification.is_read %}600{% else %}400{% endif %};">
+                                {{ notification.message }}
+                            </p>
+                            <small class="text-muted" style="font-size: 0.75rem;">
+                                <i class="fa-regular fa-clock me-1"></i>{{ notification.created_at.strftime('%d-%b %I:%M %p') if notification.created_at else 'Just now' }}
+                            </small>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fa-regular fa-bell-slash mb-3" style="font-size: 2rem;"></i>
+                        <p class="mb-0" style="font-size: 0.9rem;">You have no new notifications.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

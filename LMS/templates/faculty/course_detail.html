@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block title %}Manage Course - Faculty Portal{% endblock %}
+
+{% block content %}
+<!-- Back Link -->
+<a href="{{ url_for('faculty_dashboard') }}" class="btn btn-sm btn-outline-secondary mb-3 btn-custom">
+    <i class="fa-solid fa-arrow-left me-1"></i>Back to Dashboard
+</a>
+
+<!-- Course Header -->
+<div class="card card-custom p-4 mb-4" style="background: linear-gradient(135deg, var(--primary-dark) 0%, #1e3c72 100%); color: #ffffff;">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <span class="badge bg-info mb-2 text-dark font-weight-bold">{{ course.code }}</span>
+            <h1 class="mb-1 text-white">{{ course.name }}</h1>
+            <p class="mb-0 text-white-50"><i class="fa-regular fa-calendar me-1"></i>Created: {{ course.created_at.strftime('%d-%b-%Y') if course.created_at else 'N/A' }}</p>
+        </div>
+        <div class="text-end">
+            <span class="badge bg-light text-primary py-2 px-3 fs-6 rounded-pill">Instructor Mode</span>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs Navigation -->
+<div class="row">
+    <div class="col-lg-12">
+        <ul class="nav nav-pills mb-4" id="facultyCourseTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active btn-custom px-4 me-2" id="materials-tab" data-bs-toggle="pill" data-bs-target="#materials" type="button" role="tab" aria-controls="materials" aria-selected="true">
+                    <i class="fa-solid fa-file-pdf me-2"></i>Study Materials
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link btn-custom px-4 me-2" id="assignments-tab" data-bs-toggle="pill" data-bs-target="#assignments" type="button" role="tab" aria-controls="assignments" aria-selected="false">
+                    <i class="fa-solid fa-file-signature me-2"></i>Assignments
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link btn-custom px-4" id="grading-tab" data-bs-toggle="pill" data-bs-target="#grading" type="button" role="tab" aria-controls="grading" aria-selected="false">
+                    <i class="fa-solid fa-award me-2"></i>Grading Desk
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="facultyCourseTabContent">
+            <!-- 1. Study Materials Tab -->
+            <div class="tab-pane fade show active" id="materials" role="tabpanel" aria-labelledby="materials-tab">
+                <div class="row">
+                    <!-- Upload Form -->
+                    <div class="col-md-5 mb-4">
+                        <div class="card card-custom p-4 h-100">
+                            <h5 class="mb-3 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-cloud-arrow-up me-2"></i>Upload Note / material</h5>
+                            <form action="{{ url_for('faculty_upload_material', course_id=course.id) }}" method="POST" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="material_title" class="form-label fw-semibold text-muted">Material Title</label>
+                                    <input type="text" name="title" id="material_title" class="form-control form-control-custom" placeholder="e.g. Unit 1: Introduction to Cloud" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="material_desc" class="form-label fw-semibold text-muted">Description (Optional)</label>
+                                    <textarea name="description" id="material_desc" rows="3" class="form-control form-control-custom" placeholder="Brief summary of file contents..."></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="material_file" class="form-label fw-semibold text-muted">Choose File</label>
+                                    <input type="file" name="file" id="material_file" class="form-control form-control-custom" required>
+                                    <div class="form-text mt-1">Allowed: <strong>pdf, docx, doc, png, zip, pptx</strong>. Max: <strong>10MB</strong>.</div>
+                                </div>
+                                <button type="submit" class="btn btn-primary-custom btn-custom w-100 mt-2">
+                                    <i class="fa-solid fa-upload me-1"></i>Upload Document
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Uploaded Materials List -->
+                    <div class="col-md-7 mb-4">
+                        <div class="card card-custom p-4 h-100">
+                            <h5 class="mb-3 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-file-invoice me-2"></i>Active Materials</h5>
+                            {% if materials %}
+                                <div class="table-responsive table-responsive-custom">
+                                    <table class="table table-hover table-custom align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>Title</th>
+                                                <th>Uploaded At</th>
+                                                <th class="text-end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for mat in materials %}
+                                                <tr>
+                                                    <td>
+                                                        <div class="fw-semibold text-truncate" style="max-width: 180px;">{{ mat.title }}</div>
+                                                        <small class="text-muted text-truncate d-block" style="max-width: 180px;">{{ mat.description or 'No description' }}</small>
+                                                    </td>
+                                                    <td>{{ mat.uploaded_at.strftime('%d-%b-%Y') }}</td>
+                                                    <td class="text-end">
+                                                        <a href="{{ url_for('static', filename='uploads/materials/' + mat.file_path) }}" class="btn btn-sm btn-outline-secondary py-1 px-2 rounded-circle me-1" download title="Download">
+                                                            <i class="fa-solid fa-download"></i>
+                                                        </a>
+                                                        <form action="{{ url_for('faculty_delete_material', material_id=mat.id) }}" method="POST" class="d-inline mb-0" onsubmit="return confirm('Delete this material?');">
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2 rounded-circle" title="Delete">
+                                                                <i class="fa-solid fa-trash-can"></i>
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5 text-muted h-100 d-flex flex-column align-items-center justify-content-center">
+                                    <i class="fa-solid fa-file-circle-xmark mb-3" style="font-size: 2.5rem;"></i>
+                                    <p class="mb-0">No materials uploaded yet.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Assignments Tab -->
+            <div class="tab-pane fade" id="assignments" role="tabpanel" aria-labelledby="assignments-tab">
+                <div class="row">
+                    <!-- Create Form -->
+                    <div class="col-md-5 mb-4">
+                        <div class="card card-custom p-4 h-100">
+                            <h5 class="mb-3 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-circle-plus me-2"></i>Create Assignment</h5>
+                            <form action="{{ url_for('faculty_create_assignment', course_id=course.id) }}" method="POST">
+                                <div class="mb-3">
+                                    <label for="assign_title" class="form-label fw-semibold text-muted">Assignment Title</label>
+                                    <input type="text" name="title" id="assign_title" class="form-control form-control-custom" placeholder="e.g. Lab 1: Setting up Flask" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="assign_desc" class="form-label fw-semibold text-muted">Instructions / Description</label>
+                                    <textarea name="description" id="assign_desc" rows="4" class="form-control form-control-custom" placeholder="Provide instructions, scope, and parameters..." required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="assign_due" class="form-label fw-semibold text-muted">Due Date & Time</label>
+                                    <input type="datetime-local" name="due_date" id="assign_due" class="form-control form-control-custom" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary-custom btn-custom w-100 mt-2">
+                                    <i class="fa-solid fa-plus me-1"></i>Publish Assignment
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Assignments List -->
+                    <div class="col-md-7 mb-4">
+                        <div class="card card-custom p-4 h-100">
+                            <h5 class="mb-3 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-list-check me-2"></i>Active Assignments</h5>
+                            {% if assignments %}
+                                <div class="table-responsive table-responsive-custom">
+                                    <table class="table table-hover table-custom align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>Title</th>
+                                                <th>Due Date</th>
+                                                <th class="text-end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for assign in assignments %}
+                                                <tr>
+                                                    <td>
+                                                        <div class="fw-semibold">{{ assign.title }}</div>
+                                                        <small class="text-muted d-block text-truncate" style="max-width: 200px;">{{ assign.description }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-danger fw-semibold" style="font-size: 0.85rem;"><i class="fa-regular fa-clock me-1"></i>{{ assign.due_date.strftime('%d-%b %I:%M %p') }}</span>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <form action="{{ url_for('faculty_delete_assignment', assignment_id=assign.id) }}" method="POST" class="d-inline mb-0" onsubmit="return confirm('Delete this assignment?');">
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-3 rounded-pill">
+                                                                <i class="fa-solid fa-trash me-1"></i>Delete
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5 text-muted h-100 d-flex flex-column align-items-center justify-content-center">
+                                    <i class="fa-solid fa-circle-info mb-3" style="font-size: 2.5rem;"></i>
+                                    <p class="mb-0">No assignments published yet.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Submissions Tab -->
+            <div class="tab-pane fade" id="grading" role="tabpanel" aria-labelledby="grading-tab">
+                <div class="card card-custom p-4">
+                    <h5 class="mb-3 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-graduation-cap me-2"></i>Student Submissions</h5>
+                    
+                    {% if submissions %}
+                        <div class="table-responsive table-responsive-custom">
+                            <table class="table table-hover table-custom align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Assignment</th>
+                                        <th>Submitted On</th>
+                                        <th>File</th>
+                                        <th>Status</th>
+                                        <th>Grade</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for sub in submissions %}
+                                        <tr>
+                                            <td>
+                                                <div class="fw-semibold">{{ sub.student_name }}</div>
+                                                <small class="text-muted">Roll: {{ sub.student_roll_no }}</small>
+                                            </td>
+                                            <td class="fw-semibold">{{ sub.assignment_title }}</td>
+                                            <td>{{ sub.submitted_at.strftime('%d-%b %I:%M %p') }}</td>
+                                            <td>
+                                                <a href="{{ url_for('static', filename='uploads/submissions/' + sub.file_path) }}" class="text-primary text-decoration-none" download>
+                                                    <i class="fa-solid fa-file-arrow-down me-1"></i>Download file
+                                                </a>
+                                            </td>
+                                            <td>
+                                                {% if sub.status == 'Graded' %}
+                                                    <span class="badge bg-success-subtle text-success py-1 px-3 border border-success-subtle rounded-pill">Graded</span>
+                                                {% else %}
+                                                    <span class="badge bg-info-subtle text-info py-1 px-3 border border-info-subtle rounded-pill">Submitted</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if sub.status == 'Graded' %}
+                                                    <span class="fw-bold text-success">{{ sub.score }}</span><small class="text-muted">/100</small>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="{{ url_for('faculty_grade_submission', submission_id=sub.id) }}" class="btn btn-sm {% if sub.status == 'Graded' %}btn-outline-secondary{% else %}btn-primary-custom btn-custom{% endif %} py-1 px-3 rounded-pill">
+                                                    {% if sub.status == 'Graded' %}Edit Grade{% else %}Grade Now{% endif %}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-list-check mb-3" style="font-size: 3rem;"></i>
+                            <p class="mb-0">No submissions received yet for this course.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
