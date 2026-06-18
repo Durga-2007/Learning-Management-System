@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}My Profile - Cloud LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="mb-1 text-primary-dark">My Profile Settings</h2>
+        <p class="text-muted">Manage your student registration details and security settings.</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column: Update Info -->
+    <div class="col-md-6 mb-4">
+        <div class="card card-custom p-4 h-100">
+            <h4 class="mb-4 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-id-card me-2"></i>Registration Details</h4>
+            
+            <form action="{{ url_for('student_profile') }}" method="POST">
+                <input type="hidden" name="action" value="update_profile">
+                
+                <div class="mb-3">
+                    <label for="name" class="form-label fw-semibold text-muted">Full Name</label>
+                    <input type="text" name="name" id="name" class="form-control form-control-custom" value="{{ student.name }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label fw-semibold text-muted">Email Address</label>
+                    <input type="email" name="email" id="email" class="form-control form-control-custom" value="{{ student.email }}" required>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="roll_no" class="form-label fw-semibold text-muted">Roll Number</label>
+                        <input type="text" name="roll_no" id="roll_no" class="form-control form-control-custom" value="{{ student.roll_no }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="department" class="form-label fw-semibold text-muted">Department</label>
+                        <select name="department" id="department" class="form-select form-control-custom" required>
+                            <option value="Computer Science & Engineering" {% if student.department == 'Computer Science & Engineering' %}selected{% endif %}>Computer Science & Eng.</option>
+                            <option value="Information Technology" {% if student.department == 'Information Technology' %}selected{% endif %}>Information Technology</option>
+                            <option value="Electrical Engineering" {% if student.department == 'Electrical Engineering' %}selected{% endif %}>Electrical Engineering</option>
+                            <option value="Mechanical Engineering" {% if student.department == 'Mechanical Engineering' %}selected{% endif %}>Mechanical Engineering</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary-custom btn-custom mt-3 w-100">
+                    <i class="fa-solid fa-floppy-disk me-1"></i>Save Profile Details
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Column: Change Password -->
+    <div class="col-md-6 mb-4">
+        <div class="card card-custom p-4 h-100">
+            <h4 class="mb-4 text-primary-dark border-bottom pb-2"><i class="fa-solid fa-shield-halved me-2"></i>Security Settings</h4>
+            
+            <form action="{{ url_for('student_profile') }}" method="POST" id="password-form">
+                <input type="hidden" name="action" value="change_password">
+                
+                <div class="mb-3">
+                    <label for="current_password" class="form-label fw-semibold text-muted">Current Password</label>
+                    <input type="password" name="current_password" id="current_password" class="form-control form-control-custom" placeholder="••••••••" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="new_password" class="form-label fw-semibold text-muted">New Password</label>
+                    <input type="password" name="new_password" id="new_password" class="form-control form-control-custom" placeholder="Min 6 characters" minlength="6" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="confirm_password" class="form-label fw-semibold text-muted">Confirm New Password</label>
+                    <input type="password" name="confirm_password" id="confirm_password" class="form-control form-control-custom" placeholder="••••••••" required>
+                </div>
+                
+                <button type="submit" class="btn btn-warning btn-custom mt-3 w-100 border-0" style="background-color: var(--warning-color); color: white;">
+                    <i class="fa-solid fa-key me-1"></i>Update Password
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('password-form').addEventListener('submit', function(e) {
+        var newPass = document.getElementById('new_password').value;
+        var confPass = document.getElementById('confirm_password').value;
+        if (newPass !== confPass) {
+            e.preventDefault();
+            alert("New passwords do not match!");
+        }
+    });
+</script>
+{% endblock %}
