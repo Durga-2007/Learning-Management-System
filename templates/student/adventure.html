@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Learning Adventure - Cloud LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="mb-1 text-primary-dark"><i class="fa-solid fa-map-signs me-2 text-warning animate-pulse"></i>Learning Adventure</h2>
+        <p class="text-muted">Master your course levels, earn XP, maintain your streak, and unlock achievements!</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column: Adventure Path -->
+    <div class="col-lg-8 mb-4">
+        {% if adventure %}
+            <!-- Course Tabs -->
+            <ul class="nav nav-pills mb-4 gap-2" id="adventureTab" role="tablist">
+                {% for course in adventure %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if loop.first %}active{% endif %} rounded-pill px-4" id="course-tab-{{ course.id }}" data-bs-toggle="tab" data-bs-target="#course-content-{{ course.id }}" type="button" role="tab" aria-controls="course-content-{{ course.id }}" aria-selected="{% if loop.first %}true{% endif %}">
+                            <i class="fa-solid fa-book-open me-2"></i>{{ course.name }}
+                        </button>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <div class="tab-content" id="adventureTabContent">
+                {% for course in adventure %}
+                    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="course-content-{{ course.id }}" role="tabpanel" aria-labelledby="course-tab-{{ course.id }}">
+                        
+                        <!-- Course progress banner -->
+                        <div class="card card-custom p-4 mb-4 border-0 shadow-sm bg-gradient-primary text-white" style="background: linear-gradient(135deg, var(--primary-dark) 0%, #303f9f 100%);">
+                            <h4 class="mb-2">{{ course.name }} Progress</h4>
+                            <p class="text-white-50 mb-3">{{ course.description }}</p>
+                            
+                            <!-- Calculate progress percentage -->
+                            {% set total_levels = course.levels|length %}
+                            {% set passed_count = namespace(value=0) %}
+                            {% for lvl in course.levels %}
+                                {% if lvl.is_passed %}
+                                    {% set passed_count.value = passed_count.value + 1 %}
+                                {% endif %}
+                            {% endfor %}
+                            {% set progress_pct = (passed_count.value / total_levels * 100) | int %}
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span>Levels Mastered: {{ passed_count.value }}/{{ total_levels }}</span>
+                                <span class="fw-bold">{{ progress_pct }}% Completed</span>
+                            </div>
+                            <div class="progress bg-white-20" style="height: 10px; border-radius: 5px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress_pct }}%;" aria-valuenow="{{ progress_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+
+                        <!-- Duolingo-style Adventure Path Container -->
+                        <div class="adventure-path-container">
+                            <div class="adventure-path">
+                                {% for lvl in course.levels %}
+                                    <div class="adventure-level-item">
+                                        {% if lvl.is_passed %}
+                                            <a href="{{ url_for('student_play_level', level_id=lvl.id) }}" class="adventure-node passed" title="Level {{ lvl.level_number }}: {{ lvl.title }} (Passed)">
+                                                <i class="fa-solid fa-check"></i>
+                                            </a>
+                                        {% elif lvl.is_unlocked %}
+                                            <a href="{{ url_for('student_play_level', level_id=lvl.id) }}" class="adventure-node unlocked" title="Level {{ lvl.level_number }}: {{ lvl.title }} (Play)">
+                                                {{ lvl.level_number }}
+                                            </a>
+                                        {% else %}
+                                            <div class="adventure-node locked" title="Level {{ lvl.level_number }}: {{ lvl.title }} (Locked)">
+                                                <i class="fa-solid fa-lock"></i>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="adventure-label">
+                                            <span class="adventure-label-title">Lvl {{ lvl.level_number }}: {{ lvl.title }}</span>
+                                            <span class="adventure-label-subtitle">{{ lvl.description }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card card-custom p-5 text-center border-0 shadow-sm">
+                <i class="fa-solid fa-compass-drafting fa-3x text-muted mb-3"></i>
+                <h4>No Enrolled Courses Found</h4>
+                <p class="text-muted">Enroll in a course first to start your learning adventure!</p>
+                <a href="{{ url_for('student_dashboard') }}" class="btn btn-primary rounded-pill px-4 mt-2">Go to Dashboard</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Column: Stats & Achievements -->
+    <div class="col-lg-4">
+        <!-- Streak Card -->
+        <div class="card card-custom p-4 mb-4 border-0 shadow-sm text-center">
+            <h5 class="text-primary-dark mb-3"><i class="fa-solid fa-fire me-2 text-danger"></i>Daily Streak</h5>
+            {% if game_stats %}
+                <div class="display-3 fw-bold text-danger animate-pulse mb-2">
+                    {{ game_stats.current_streak }}
+                </div>
+                <p class="fw-semibold text-dark">Consecutive Active Days</p>
+                <p class="text-muted small">Longest streak: {{ game_stats.longest_streak }} days. Keep learning daily to build your streak!</p>
+            {% else %}
+                <div class="display-3 fw-bold text-muted mb-2">0</div>
+                <p class="text-muted">No active streak yet. Log in tomorrow to start a streak!</p>
+            {% endif %}
+        </div>
+
+        <!-- Badges Card -->
+        <div class="card card-custom p-4 border-0 shadow-sm">
+            <h5 class="text-primary-dark mb-3"><i class="fa-solid fa-award me-2 text-warning"></i>Earned Badges</h5>
+            {% if game_stats and game_stats.earned_badges %}
+                <div class="row row-cols-3 g-3">
+                    {% for badge in game_stats.earned_badges %}
+                        <div class="col text-center" title="{{ badge.description }} (Earned on {{ badge.earned_at.strftime('%Y-%m-%d') if badge.earned_at else 'N/A' }})">
+                            <div class="badge-icon-wrapper p-2 bg-light rounded shadow-sm mb-2" style="border: 2px solid {% if 'Gold' in badge.name %}#ffd700{% elif 'Silver' in badge.name %}#c0c0c0{% elif 'Bronze' in badge.name %}#cd7f32{% else %}var(--primary-color){% endif %};">
+                                <i class="{{ badge.icon_class or 'fa-solid fa-shield-halved' }} fa-2x" style="color: {% if 'Gold' in badge.name %}#ffd700{% elif 'Silver' in badge.name %}#b0b0b0{% elif 'Bronze' in badge.name %}#cd7f32{% else %}var(--primary-color){% endif %};"></i>
+                            </div>
+                            <div class="small fw-bold text-truncate" style="max-width: 100px;">{{ badge.name }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="fa-solid fa-lock fa-2x mb-2 text-white-50"></i>
+                    <p class="small mb-0">No badges earned yet. Pass quizzes to earn badges!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
