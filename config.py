@@ -5,7 +5,7 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'lms_secret_key_2026_deepmind_antigravity')
     
     # MySQL Database configuration
-    DB_HOST = os.environ.get('DB_HOST', 'localhost')
+    DB_HOST = os.environ.get('DB_HOST', 'lms-db.cpc2ycqqqc5u.ap-southeast-2.rds.amazonaws.com')
     DB_USER = os.environ.get('DB_USER', 'root')
     DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Durgaselvi@2007') # Default blank for local MySQL/XAMPP
     DB_NAME = os.environ.get('DB_NAME', 'lmsdb')
