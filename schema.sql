@@ -1,8 +1,8 @@
 -- AI-Powered Cloud LMS Database Schema
 -- Run this script in MySQL to set up the database structure.
 
-CREATE DATABASE IF NOT EXISTS lmsdb;
-USE lmsdb;
+CREATE DATABASE IF NOT EXISTS lms_db;
+USE lms_db;
 
 -- 1. Admin Table
 CREATE TABLE IF NOT EXISTS admins (
