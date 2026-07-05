@@ -68,7 +68,7 @@ def get_submission_by_id(submission_id):
     Retrieves details of a single submission.
     """
     query = """
-        SELECT s.*, st.name as student_name, st.roll_no as student_roll_no, st.email as student_email,
+        SELECT s.*, a.course_id, st.name as student_name, st.roll_no as student_roll_no, st.email as student_email,
                a.title as assignment_title, a.due_date, c.name as course_name, m.score, m.feedback
         FROM submissions s
         JOIN students st ON s.student_id = st.id

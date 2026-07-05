@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 import os
+import boto3
 
 from config import Config, allowed_file
 from database.db import fetch_one, fetch_all, execute_query
@@ -13,10 +14,13 @@ import models.notification as notification_model
 import models.ai_helper as ai_model
 import models.study_buddy as buddy_model
 import models.gamification as gamification_model
-import models.rag_helper as rag_helper
+#import models.rag_helper as rag_helper
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+s3 = boto3.client('s3')
+BUCKET_NAME = "lms-bucketstorage-s3"
 
 @app.context_processor
 def inject_gamification():
@@ -762,6 +766,11 @@ def faculty_upload_material(course_id):
         filename = secure_filename(f"note_{course_id}_{timestamp}.{ext}")
         file_path = os.path.join(MATERIALS_DIR, filename)
         file.save(file_path)
+        s3.upload_file(
+            file_path,
+            BUCKET_NAME,
+            filename
+        )
         
         # Add to DB
         mat_id = course_model.upload_material(course_id, title, description, filename)
@@ -1201,10 +1210,15 @@ def seed_database():
     except Exception as e:
         print(f"[AUTO-SEEDER WARNING] Database seeding checks skipped. Ensure MySQL is running and schema.sql is imported. Error details: {e}")
 
-# Call seeder on startup
-seed_database()
 
 
-if __name__ == '__main__':
-    # Running locally on port 5000
-    app.run(debug=True, host='127.0.0.1', port=5000)
+@app.route("/")
+def home():
+    return "LMS Running"
+
+if __name__ == "__main__":
+    seed_database()
+    app.run(debug=True)
+
+
+

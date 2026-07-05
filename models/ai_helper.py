@@ -4,7 +4,7 @@ import urllib.error
 import os
 import random
 from config import Config
-from models import rag_helper
+#from models import rag_helper
 
 # =============================================================================
 # COMPREHENSIVE LOCAL KNOWLEDGE BASE
