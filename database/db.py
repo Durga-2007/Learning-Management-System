@@ -8,13 +8,13 @@ def get_db_connection():
     It automatically uses DictCursor to return rows as dictionary-like objects.
     """
     return pymysql.connect(
-        host=Config.DB_HOST,
-        user=Config.DB_USER,
-        password=Config.DB_PASSWORD,
-        database=Config.DB_NAME,
-        cursorclass=pymysql.cursors.DictCursor,
-        autocommit=True
-    )
+    host="lms-db.cpc2ycqqqc5u.ap-southeast-2.rds.amazonaws.com",
+    user="admin",
+    password="durgaselvaraj1401",
+    database="lmsdb",
+    cursorclass=pymysql.cursors.DictCursor,
+    autocommit=True
+)
 
 def fetch_all(query, params=None):
     """

@@ -6,8 +6,8 @@ class Config:
     
     # MySQL Database configuration
     DB_HOST = os.environ.get('DB_HOST', 'lms-db.cpc2ycqqqc5u.ap-southeast-2.rds.amazonaws.com')
-    DB_USER = os.environ.get('DB_USER', 'root')
-    DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Durgaselvi@2007') # Default blank for local MySQL/XAMPP
+    DB_USER = os.environ.get('DB_USER', 'admin')
+    DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Durgaselvaraj1401')
     DB_NAME = os.environ.get('DB_NAME', 'lmsdb')
     
     # Upload configurations
