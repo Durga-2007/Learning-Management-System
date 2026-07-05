@@ -11,7 +11,7 @@ def get_db_connection():
     host="lms-db.cpc2ycqqqc5u.ap-southeast-2.rds.amazonaws.com",
     user="admin",
     password="durgaselvaraj1401",
-    database="lmsdb",
+    database="lms_db",
     cursorclass=pymysql.cursors.DictCursor,
     autocommit=True
 )

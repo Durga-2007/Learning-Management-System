@@ -8,7 +8,7 @@ class Config:
     DB_HOST = os.environ.get('DB_HOST', 'lms-db.cpc2ycqqqc5u.ap-southeast-2.rds.amazonaws.com')
     DB_USER = os.environ.get('DB_USER', 'admin')
     DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Durgaselvaraj1401')
-    DB_NAME = os.environ.get('DB_NAME', 'lmsdb')
+    DB_NAME = os.environ.get('DB_NAME', 'lms_db')
     
     # Upload configurations
     UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static', 'uploads')
