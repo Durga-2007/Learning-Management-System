@@ -14,7 +14,7 @@ import models.notification as notification_model
 import models.ai_helper as ai_model
 import models.study_buddy as buddy_model
 import models.gamification as gamification_model
-#import models.rag_helper as rag_helper
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
