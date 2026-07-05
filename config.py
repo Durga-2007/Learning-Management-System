@@ -8,7 +8,7 @@ class Config:
     DB_HOST = os.environ.get('DB_HOST', 'localhost')
     DB_USER = os.environ.get('DB_USER', 'root')
     DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Durgaselvi@2007') # Default blank for local MySQL/XAMPP
-    DB_NAME = os.environ.get('DB_NAME', 'lms_db')
+    DB_NAME = os.environ.get('DB_NAME', 'lmsdb')
     
     # Upload configurations
     UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static', 'uploads')
